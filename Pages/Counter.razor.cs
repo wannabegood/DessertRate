@@ -1,4 +1,6 @@
-﻿using DessertRate.Models;
+﻿using System.Text;
+using DessertRate.Models;
+using FoundryRulesAndUnits.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
@@ -20,8 +22,21 @@ public class CounterBase : ComponentBase
     {
         RatingModel.DoSortID();
 
-        var json = RatingModel.ToJSON();
-        Message = json;
+        // var json = RatingModel.ToJSON();
+
+        // var data = RatingModel.EncodePropertyNamesAsCSV();
+
+        var data = new StringBuilder();
+        foreach (var item in RatingModel.ratingRows)
+        {
+            // data += CodingExtensions.Dehydrate(item, true);
+            // data += item.EncodePropertyDataAsCSV();
+            data.Append(item.dessertID).Append(',').AppendLine($"{item.ranking}");
+        }
+
+        Message = data.ToString();
+
+        // Message = json;
 
         // await AzureBlobService.UploadData("november2022", "data", $"{RatingModel.name}.json", json);
 

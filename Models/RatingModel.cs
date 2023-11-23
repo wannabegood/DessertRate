@@ -20,6 +20,8 @@ public class RatingModel
     public List<RatingRow> ratingRows { get; set; } = new();
     private List<string> ImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/l867c105n0epv972h16vv/dessert5.jpg?rlkey=d6yiese7ddy2awpk9p14ihztb&dl=0"];
 
+    // https://www.dropbox.com/scl/fi/l867c105n0epv972h16vv/dessert5.jpg?rlkey=d6yiese7ddy2awpk9p14ihztb&dl=0
+
     private EnvConfig _config;
 
     public RatingModel()
