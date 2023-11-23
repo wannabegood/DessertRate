@@ -1,18 +1,14 @@
 ﻿@page "/counter"
+@inherits CounterBase
+@namespace DessertRate.Pages
 
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 
-<p role="status">My Current count: @currentCount</p>
+<p role="status">My Current count: @CurrentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-
-@code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
-}
+<button class="btn btn-primary" @onclick="DropBoxSave">Drop Box Save</button>
+<button class="btn btn-primary" @onclick="Save">Save</button>
+<button class="btn btn-primary" @onclick="Email">Email</button>
