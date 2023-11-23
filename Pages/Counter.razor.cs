@@ -7,7 +7,7 @@ public class CounterBase : ComponentBase
 {
 
     protected int CurrentCount { get; set; } = 0;
-    private string Token { get; } = "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";
+    private string Token { get; } = "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";
     protected void IncrementCount()
     {
         CurrentCount++;
