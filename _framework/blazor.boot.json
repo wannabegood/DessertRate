@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "DessertRate",
   "resources": {
-    "hash": "sha256-jiIfJ1OvPfSdUSRiLtN8xNafbdwPlT54ucBBBxPI4Qk=",
+    "hash": "sha256-rvmFgaXfQsBOmyVLfR1dyVw2CAOJq9+JRtytHvIBJAs=",
     "jsModuleNative": {
       "dotnet.native.8.0.0.45ykigla5r.js": "sha256-LjLDIz9+J7uuiwMlQ4HbNx2BnSpphOtO2MwkoI28vdI="
     },
@@ -18,11 +18,11 @@
     },
     "assembly": {
       "BouncyCastle.Cryptography.wasm": "sha256-tZxUz5R8To9wugB18BSeGE89A5lQ0IsnaCl5AkgKfnY=",
-      "DessertRate.wasm": "sha256-nCe9fVz6RUniypAXWtZCKrDTyod+q2mtOhfaB7oYyRA=",
+      "DessertRate.wasm": "sha256-ghnKYeLpKtxJiUTNNekp+Z35iYgl5fH+sVDHtblW5BU=",
       "Dropbox.Api.wasm": "sha256-mq4Ek20l6odwrkIainho+KvcDZmU22qg5Os+dhrgpfE=",
       "FoundryRulesAndUnits.wasm": "sha256-ATo9VWho7SIaRU61aJRPPrn9TdNBUuafZ1cdRWTVk74=",
       "MailKit.wasm": "sha256-/9u++sBPINSOh4er1EelW0i4u500HaCK7UShUTZzM7c=",
-      "Microsoft.AspNetCore.Components.wasm": "sha256-yqJUmbytKwiFI/7sNUgkeGx4BkAfNjXBlwQl8r3YPK0=",
+      "Microsoft.AspNetCore.Components.wasm": "sha256-Cb2EweJEmz0KgY6FrY8k8YKyweQSQOqFZYNojpROswY=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-ivj7kxN8rrhTm1UV0H7dhsOewu6rhATFU2ZAG/YKLvA=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-jxT5OPvGNxCa5Ode34Vj10dSuqq5umUUvi5WqGMI6uA=",
       "Microsoft.CSharp.wasm": "sha256-gYOAIn43uyv6OzB4Ej97weX1Urg9ODuWSGzvD7gx2M8=",
