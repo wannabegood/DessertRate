@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using FoundryRulesAndUnits.Extensions;
 using Microsoft.AspNetCore.Components;
 using Octokit;
 
@@ -7,46 +8,27 @@ public class CounterBase : ComponentBase
 {
 
     protected int CurrentCount { get; set; } = 0;
-    private string Token { get; } = "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";
+    protected string Name { get; set; } = string.Empty;
+    protected string Email { get; set; } = string.Empty;
+    protected string Message { get; set; } = string.Empty;
+
+
     protected void IncrementCount()
     {
         CurrentCount++;
+        Message = $"{CurrentCount}";
     }
 
-    protected async Task Save()
+    protected void OnChangeName(ChangeEventArgs args)
     {
-        IncrementCount();
-        var client = new GitHubClient(new ProductHeaderValue("DessertRate"));
-        var tokenAuth = new Credentials(Token);
-        client.Credentials = tokenAuth;
-
-        var sb = new StringBuilder("---");
-        sb.AppendLine();
-        sb.AppendLine($"date: \"2023-11-23\"");
-        sb.AppendLine($"title: \"My new fancy updated post\"");
-        sb.AppendLine("tags: [csharp, azure, dotnet]");
-        sb.AppendLine("---");
-        sb.AppendLine();
-
-        sb.AppendLine("The heading for my first post");
-        sb.AppendLine();
-
-        var (owner, repoName, filePath, branch) = ("wannabegood", "DessertRate",
-                $"data/file.txt-{CurrentCount}", "data");
-
-        await client.Repository.Content.CreateFile(
-             owner, repoName, filePath,
-             new CreateFileRequest($"First commit for {filePath}", sb.ToString(), branch));
-
+        Email = $"{args.Value}@somerandomplace222.com";
     }
 
-    // protected async void DropBoxSave()
-    // {
-    //     using var client = new DropboxClient(DropboxToken);
-    //     var filePath = "/test1.txt";
+    protected bool GetSubmitDisabled()
+    {
+        Console.WriteLine("in get Submit disabled");
+        return !(Name.Trim().Length > 0);
+    }
 
-    //     var text = "abcdefghijklmnopqrstuvwxyz";
-    //     using var stream = new MemoryStream(Encoding.ASCII.GetBytes(text));
-    //     await client.Files.UploadAsync(filePath, WriteMode.Overwrite.Instance, body: stream);
-    // }
+
 }

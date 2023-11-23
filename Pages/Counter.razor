@@ -1,15 +1,22 @@
-﻿@page "/counter"
+﻿@page "/"
 @inherits CounterBase
 @namespace DessertRate.Pages
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Dessert Rate</PageTitle>
 
-<h1>Counter</h1>
+<h1>Dessert Rate</h1>
 
-<p role="status">My Current count: @CurrentCount</p>
 
 <img src="https://dl.dropboxusercontent.com/scl/fi/l867c105n0epv972h16vv/dessert5.jpg?rlkey=d6yiese7ddy2awpk9p14ihztb&dl=0"
     width="300" height="200" />
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<button class="btn btn-primary" @onclick="Save">Save</button>
+
+<input type="text" name="name" @oninput="@OnChangeName" @bind-value="@Name">
+<form action="https://formspree.io/f/xnqkkalq" method="POST">
+    <input type="hidden" name="email" @bind-value="@Email">
+    <textarea style="visibility: hidden" name="message">
+        @Message
+        </textarea>
+    <button disabled="@GetSubmitDisabled()" class="btn btn-primary" type="submit">Vote!</button>
+</form>
