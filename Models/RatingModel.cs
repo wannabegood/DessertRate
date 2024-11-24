@@ -92,6 +92,7 @@ public class RatingModel
 
     public List<RatingRow> GetRatingRows()
     {
+        Console.WriteLine("In GetRatingRows");
         RatingRows = [];
         var cnt = 1;
         var index = 1;

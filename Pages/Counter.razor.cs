@@ -11,11 +11,13 @@ public class CounterBase : ComponentBase
     protected string Name { get; set; } = string.Empty;
     protected string Email { get; set; } = string.Empty;
     protected string Message { get; set; } = string.Empty;
+    protected List<RatingRow> RatingRows = [];
 
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    // }    
+    protected override void OnInitialized()
+    {
+        RatingRows = RatingModel.GetRatingRows();
+    }
 
     protected void HandleValidSubmit(EditContext editContext)
     {
@@ -57,7 +59,7 @@ public class CounterBase : ComponentBase
     {
         // if (row.ranking > 1) row.ranking -= 1;
         row.Ranking -= 1;
-        Console.WriteLine($"click plus {row.Ranking}");
+        Console.WriteLine($"click minus {row.Ranking}");
         RatingModel.Validate();
         // StateHasChanged();
     }

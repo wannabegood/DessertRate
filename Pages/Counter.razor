@@ -29,7 +29,7 @@
         <ul class="mt-4 list-group">
 
 
-            @foreach (var item in RatingModel.GetRatingRows())
+            @foreach (var item in RatingRows)
             {
                 <li class="mb-2 list-group-item">
                     <div class="d-flex flex-row align-items-center">
@@ -42,7 +42,7 @@
                             <label>
                                 <div>Rank:</div>
                                 <InputNumber id="value" @bind-Value="item.Ranking" class="rank-input rounded" min="1"
-                                    max="@RatingModel.RatingRows.Count" />
+                                    max="@RatingModel.RatingRows.Count" @key="item.DessertID" />
                             </label>
                         </div>
                         <div class="ms-4">
