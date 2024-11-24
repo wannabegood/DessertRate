@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
+using static System.Net.WebRequestMethods;
 namespace DessertRate.Models;
 
 public class RatingRow
@@ -17,14 +19,16 @@ public class RatingModel
     [StringLength(30, MinimumLength = 3, ErrorMessage = "Name must be at least 3 characters.")]
     public string Name { get; set; } = "";
     public bool Valid { get; set; }
-    public List<RatingRow> RatingRows { get; set; } = new();
+    public List<RatingRow> RatingRows { get; set; } = [];
     private List<string> ImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/dpbd5sx0c5i8ygfkgxeko/Dessert-01.jpg?rlkey=6o9mj8bxticx37pwfhrumx459&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/8tc8cw4rq0208ukh2nxdh/Dessert-02.jpg?rlkey=b57qpoisx1hbq2kho99k9lqa1&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/nvfb9yngovpjuqyxm8okb/Dessert-03.jpg?rlkey=7qk3zc2q74jbibo027w79q4pv&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/n36pasfa593gqat0n5ir0/Dessert-04.jpg?rlkey=yb2i547fosekqbfs8v1l873sp&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/teo4230teokn2dbpmdqj0/Dessert-05.jpg?rlkey=7j56jpml4xzw4f3m48nmr5ls1&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/47vgbbx3036v1veeepg17/Dessert-06.jpg?rlkey=hkqy75hci81ugi0sxjasqelob&dl=0",
-    "https://dl.dropboxusercontent.com/scl/fi/uuwpuwwr0bs7av85myno1/Dessert-08.jpg?rlkey=m8m2ogpcaiztyhiyvrjycvzwk&dl=0"
+    "https://dl.dropboxusercontent.com/scl/fi/k9dbwk6nrd7x5jfz2j7bm/Dessert-07-1.jpg?rlkey=u06vdrlw2v21uxefhklgqs6q3&st=9cwffu8g&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/uuwpuwwr0bs7av85myno1/Dessert-08.jpg?rlkey=m8m2ogpcaiztyhiyvrjycvzwk&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/huokuyk33yq2fzd9dn71z/Dessert-09.jpg?rlkey=7whawzg6aha3bm5by44dmydh8&st=g73yc5fb&dl=0"
     ];
 
 

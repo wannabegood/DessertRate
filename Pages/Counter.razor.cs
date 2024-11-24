@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.Forms;
 namespace DessertRate.Pages;
 public class CounterBase : ComponentBase
 {
+    [Inject] HttpClient Http { get; set; }
     protected RatingModel RatingModel = new();
     protected int CurrentCount { get; set; } = 0;
     protected string Name { get; set; } = string.Empty;
