@@ -4,10 +4,10 @@ namespace DessertRate.Models;
 
 public class RatingRow
 {
-    public string name { get; set; } = "NO_NAME";
-    public string dessertID { get; set; } = "";
-    public string imageURL { get; set; } = "";
-    public int ranking { get; set; } = 0;
+    public string Name { get; set; } = "NO_NAME";
+    public string DessertID { get; set; } = "";
+    public string ImageURL { get; set; } = "";
+    public int Ranking { get; set; } = 0;
 
 }
 
@@ -15,9 +15,9 @@ public class RatingModel
 {
     [Required]
     [StringLength(30, MinimumLength = 3, ErrorMessage = "Name must be at least 3 characters.")]
-    public string name { get; set; } = "";
-    public bool valid { get; set; }
-    public List<RatingRow> ratingRows { get; set; } = new();
+    public string Name { get; set; } = "";
+    public bool Valid { get; set; }
+    public List<RatingRow> RatingRows { get; set; } = new();
     private List<string> ImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/dpbd5sx0c5i8ygfkgxeko/Dessert-01.jpg?rlkey=6o9mj8bxticx37pwfhrumx459&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/8tc8cw4rq0208ukh2nxdh/Dessert-02.jpg?rlkey=b57qpoisx1hbq2kho99k9lqa1&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/nvfb9yngovpjuqyxm8okb/Dessert-03.jpg?rlkey=7qk3zc2q74jbibo027w79q4pv&dl=0",
@@ -33,7 +33,7 @@ public class RatingModel
     public RatingModel()
     {
         _config = new EnvConfig();
-        valid = Validate();
+        Valid = Validate();
     }
     // private string GetImgSrc(string name)
     // {
@@ -56,57 +56,57 @@ public class RatingModel
 
     private List<RatingRow> AssignNameToRows()
     {
-        foreach (var row in ratingRows)
+        foreach (var row in RatingRows)
         {
-            row.name = name;
+            row.Name = Name;
         }
-        return ratingRows;
+        return RatingRows;
 
     }
 
     public List<RatingRow> DoSortID()
     {
-        ratingRows = ratingRows.OrderBy((x) => x.dessertID).ToList();
-        return ratingRows;
+        RatingRows = RatingRows.OrderBy((x) => x.DessertID).ToList();
+        return RatingRows;
     }
 
     public List<RatingRow> DoSortRank()
     {
-        ratingRows = ratingRows.OrderBy((x) => x.ranking).ToList();
-        return ratingRows;
+        RatingRows = RatingRows.OrderBy((x) => x.Ranking).ToList();
+        return RatingRows;
     }
 
     public bool Validate()
     {
-        var imageCount = ratingRows.Count;
+        var imageCount = RatingRows.Count;
         var expectedRankTotal = imageCount * (imageCount + 1) / 2;
         var actualTotal = 0;
-        ratingRows.ForEach((item) =>
+        RatingRows.ForEach((item) =>
         {
-            actualTotal += item.ranking;
+            actualTotal += item.Ranking;
         });
 
-        valid = expectedRankTotal == actualTotal;
-        return valid;
+        Valid = expectedRankTotal == actualTotal;
+        return Valid;
     }
 
     public List<RatingRow> GetRatingRows()
     {
-        ratingRows = [];
+        RatingRows = [];
         var cnt = 1;
         var index = 1;
         foreach (var imageLink in ImageLinks)
         {
             var ratingRow = new RatingRow()
             {
-                dessertID = $"Dessert-{cnt++}",
-                imageURL = imageLink,
-                ranking = index++
+                DessertID = $"Dessert-{cnt++}",
+                ImageURL = imageLink,
+                Ranking = index++
             };
-            ratingRows.Add(ratingRow);
+            RatingRows.Add(ratingRow);
         }
 
-        return ratingRows;
+        return RatingRows;
 
     }
 
@@ -134,7 +134,7 @@ public class RatingModel
     {
         // AssignNameToRows();
         var opt = new JsonSerializerOptions() { WriteIndented = true };
-        var strJson = JsonSerializer.Serialize<List<RatingRow>>(ratingRows, opt);
+        var strJson = JsonSerializer.Serialize<List<RatingRow>>(RatingRows, opt);
         Console.WriteLine(strJson);
         return strJson;
     }

@@ -26,11 +26,11 @@ public class CounterBase : ComponentBase
         // var data = RatingModel.EncodePropertyNamesAsCSV();
 
         var data = new StringBuilder();
-        foreach (var item in RatingModel.ratingRows)
+        foreach (var item in RatingModel.RatingRows)
         {
             // data += CodingExtensions.Dehydrate(item, true);
             // data += item.EncodePropertyDataAsCSV();
-            data.Append(item.dessertID).Append(',').AppendLine($"{item.ranking}");
+            data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
         }
 
         Message = data.ToString();
@@ -47,8 +47,8 @@ public class CounterBase : ComponentBase
     protected void ClickPlus(RatingRow row)
     {
         // if (row.ranking < RatingModel.ratingRows.Count) row.ranking += 1;
-        row.ranking += 1;
-        Console.WriteLine($"click plus {row.ranking}");
+        row.Ranking += 1;
+        Console.WriteLine($"click plus {row.Ranking}");
         RatingModel.Validate();
         // StateHasChanged();
     }
@@ -56,8 +56,8 @@ public class CounterBase : ComponentBase
     protected void ClickMinus(RatingRow row)
     {
         // if (row.ranking > 1) row.ranking -= 1;
-        row.ranking -= 1;
-        Console.WriteLine($"click plus {row.ranking}");
+        row.Ranking -= 1;
+        Console.WriteLine($"click plus {row.Ranking}");
         RatingModel.Validate();
         // StateHasChanged();
     }
@@ -79,7 +79,7 @@ public class CounterBase : ComponentBase
 
     protected void OnChangeName(ChangeEventArgs args)
     {
-        RatingModel.name = $"{args.Value}";
+        RatingModel.Name = $"{args.Value}";
         Email = $"{args.Value}@somerandomplace222.com";
     }
 
