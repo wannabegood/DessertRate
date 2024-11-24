@@ -66,12 +66,12 @@ public class CounterBase : ComponentBase
 
     protected void ClickSortID()
     {
-        RatingModel.DoSortID();
+        RatingRows = RatingModel.DoSortID();
     }
 
     protected void ClickSortRank()
     {
-        RatingModel.DoSortRank();
+        RatingRows = RatingModel.DoSortRank();
     }
     protected void IncrementCount()
     {

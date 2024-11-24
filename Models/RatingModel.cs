@@ -66,13 +66,13 @@ public class RatingModel
 
     public List<RatingRow> DoSortID()
     {
-        RatingRows = RatingRows.OrderBy((x) => x.DessertID).ToList();
+        RatingRows = [.. RatingRows.OrderBy((x) => x.DessertID)];
         return RatingRows;
     }
 
     public List<RatingRow> DoSortRank()
     {
-        RatingRows = RatingRows.OrderBy((x) => x.Ranking).ToList();
+        RatingRows = [.. RatingRows.OrderBy((x) => x.Ranking)];
         return RatingRows;
     }
 
