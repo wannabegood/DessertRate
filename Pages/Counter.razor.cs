@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using DessertRate.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -13,12 +14,18 @@ public class CounterBase : ComponentBase
     protected string Email { get; set; } = string.Empty;
     protected string Message { get; set; } = string.Empty;
     protected List<RatingRow> RatingRows = [];
+    protected List<string> ImageUrls = [];
 
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        RatingRows = RatingModel.GetRatingRows();
+        ImageUrls = await Http.GetFromJsonAsync<List<string>>("sample-data/image-urls.json");
+        RatingRows = RatingModel.GetRatingRows(ImageUrls);
     }
+
+    // protected override void OnInitialized()
+    // {
+    //     RatingRows = RatingModel.GetRatingRows();
+    // }
 
     protected void HandleValidSubmit(EditContext editContext)
     {
