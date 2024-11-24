@@ -23,26 +23,25 @@
 </div>
 
 <div class="mt-2 mb-4">
-    <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.ratingRows.Count = Least Favorite)</div>
-    <EditForm action="https://formspree.io/f/xnqkkalq" OnValidSubmit="@HandleValidSubmit" method="POST"
+    <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)</div>
+    <EditForm action="https://formspree.io/f/xzzbaajv" OnValidSubmit="@HandleValidSubmit" method="POST"
         Model="@RatingModel">
 
         <ul class="mt-4 list-group">
-
-
-            @foreach (var item in RatingModel.GetRatingRows())
+            @foreach (var item in RatingRows)
             {
                 <li class="mb-2 list-group-item">
                     <div class="d-flex flex-row align-items-center">
                         <div>
-                            <div class="h6 title-text">@item.dessertID</div>
-                            <img src="@item.imageURL" class="dessert-image rounded" alt="image1" title="image1" />
+                            <div class="h6 title-text">@item.DessertID</div>
+                            <img src="@item.ImageURL" width="180" height="120" class="dessert-image rounded" alt="image1"
+                                title="image1" />
                         </div>
                         <div class="ms-4">
                             <label>
                                 <div>Rank:</div>
-                                <InputNumber id="value" readonly @bind-Value="item.ranking" class="rank-input rounded"
-                                    min="1" max="@RatingModel.ratingRows.Count" />
+                                <InputNumber id="value" @bind-Value="item.Ranking" class="rank-input rounded" min="1"
+                                    max="@RatingModel.RatingRows.Count" @key="item.DessertID" />
                             </label>
                         </div>
                         <div class="ms-4">
@@ -63,7 +62,7 @@
         </ul>
 
         <div class="d-flex justify-content-center">
-            @if (RatingModel.valid)
+            @if (RatingModel.Valid)
             {
                 <div>
                     <DataAnnotationsValidator />
@@ -93,7 +92,7 @@
 
 @* <input type="text" name="name" @oninput="@OnChangeName" @bind-value="@Name"> *@
 <div class="d-flex justify-content-center">
-    <form action="https://formspree.io/f/xnqkkalq" method="POST">
+    <form action="https://formspree.io/f/xzzbaajv" method="POST">
         <input type="hidden" name="email" @bind-value="@Email">
         <textarea style="visibility: hidden" name="message">
             @Message

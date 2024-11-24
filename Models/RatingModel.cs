@@ -1,13 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
+using static System.Net.WebRequestMethods;
 namespace DessertRate.Models;
 
 public class RatingRow
 {
-    public string name { get; set; } = "NO_NAME";
-    public string dessertID { get; set; } = "";
-    public string imageURL { get; set; } = "";
-    public int ranking { get; set; } = 0;
+    public string Name { get; set; } = "NO_NAME";
+    public string DessertID { get; set; } = "";
+    public string ImageURL { get; set; } = "";
+    public int Ranking { get; set; } = 0;
 
 }
 
@@ -15,19 +17,27 @@ public class RatingModel
 {
     [Required]
     [StringLength(30, MinimumLength = 3, ErrorMessage = "Name must be at least 3 characters.")]
-    public string name { get; set; } = "";
-    public bool valid { get; set; }
-    public List<RatingRow> ratingRows { get; set; } = new();
-    private List<string> ImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/l867c105n0epv972h16vv/dessert5.jpg?rlkey=d6yiese7ddy2awpk9p14ihztb&dl=0"];
+    public string Name { get; set; } = "";
+    public bool Valid { get; set; }
+    public List<RatingRow> RatingRows { get; set; } = [];
+    private List<string> ImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/dpbd5sx0c5i8ygfkgxeko/Dessert-01.jpg?rlkey=6o9mj8bxticx37pwfhrumx459&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/8tc8cw4rq0208ukh2nxdh/Dessert-02.jpg?rlkey=b57qpoisx1hbq2kho99k9lqa1&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/nvfb9yngovpjuqyxm8okb/Dessert-03.jpg?rlkey=7qk3zc2q74jbibo027w79q4pv&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/n36pasfa593gqat0n5ir0/Dessert-04.jpg?rlkey=yb2i547fosekqbfs8v1l873sp&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/teo4230teokn2dbpmdqj0/Dessert-05.jpg?rlkey=7j56jpml4xzw4f3m48nmr5ls1&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/47vgbbx3036v1veeepg17/Dessert-06.jpg?rlkey=hkqy75hci81ugi0sxjasqelob&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/k9dbwk6nrd7x5jfz2j7bm/Dessert-07-1.jpg?rlkey=u06vdrlw2v21uxefhklgqs6q3&st=9cwffu8g&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/uuwpuwwr0bs7av85myno1/Dessert-08.jpg?rlkey=m8m2ogpcaiztyhiyvrjycvzwk&dl=0",
+    "https://dl.dropboxusercontent.com/scl/fi/huokuyk33yq2fzd9dn71z/Dessert-09.jpg?rlkey=7whawzg6aha3bm5by44dmydh8&st=g73yc5fb&dl=0"
+    ];
 
-    // https://www.dropbox.com/scl/fi/l867c105n0epv972h16vv/dessert5.jpg?rlkey=d6yiese7ddy2awpk9p14ihztb&dl=0
 
     private EnvConfig _config;
 
     public RatingModel()
     {
         _config = new EnvConfig();
-        valid = Validate();
+        Valid = Validate();
     }
     // private string GetImgSrc(string name)
     // {
@@ -50,57 +60,58 @@ public class RatingModel
 
     private List<RatingRow> AssignNameToRows()
     {
-        foreach (var row in ratingRows)
+        foreach (var row in RatingRows)
         {
-            row.name = name;
+            row.Name = Name;
         }
-        return ratingRows;
+        return RatingRows;
 
     }
 
     public List<RatingRow> DoSortID()
     {
-        ratingRows = ratingRows.OrderBy((x) => x.dessertID).ToList();
-        return ratingRows;
+        RatingRows = [.. RatingRows.OrderBy((x) => x.DessertID)];
+        return RatingRows;
     }
 
     public List<RatingRow> DoSortRank()
     {
-        ratingRows = ratingRows.OrderBy((x) => x.ranking).ToList();
-        return ratingRows;
+        RatingRows = [.. RatingRows.OrderBy((x) => x.Ranking)];
+        return RatingRows;
     }
 
     public bool Validate()
     {
-        var imageCount = ratingRows.Count;
+        var imageCount = RatingRows.Count;
         var expectedRankTotal = imageCount * (imageCount + 1) / 2;
         var actualTotal = 0;
-        ratingRows.ForEach((item) =>
+        RatingRows.ForEach((item) =>
         {
-            actualTotal += item.ranking;
+            actualTotal += item.Ranking;
         });
 
-        valid = expectedRankTotal == actualTotal;
-        return valid;
+        Valid = expectedRankTotal == actualTotal;
+        return Valid;
     }
 
     public List<RatingRow> GetRatingRows()
     {
-        ratingRows = [];
+        Console.WriteLine("In GetRatingRows");
+        RatingRows = [];
         var cnt = 1;
-        var index = 0;
+        var index = 1;
         foreach (var imageLink in ImageLinks)
         {
             var ratingRow = new RatingRow()
             {
-                dessertID = $"Dessert-{cnt++}",
-                imageURL = imageLink,
-                ranking = index + 1
+                DessertID = $"Dessert-{cnt++}",
+                ImageURL = imageLink,
+                Ranking = index++
             };
-            ratingRows.Add(ratingRow);
+            RatingRows.Add(ratingRow);
         }
 
-        return ratingRows;
+        return RatingRows;
 
     }
 
@@ -128,7 +139,7 @@ public class RatingModel
     {
         // AssignNameToRows();
         var opt = new JsonSerializerOptions() { WriteIndented = true };
-        var strJson = JsonSerializer.Serialize<List<RatingRow>>(ratingRows, opt);
+        var strJson = JsonSerializer.Serialize<List<RatingRow>>(RatingRows, opt);
         Console.WriteLine(strJson);
         return strJson;
     }

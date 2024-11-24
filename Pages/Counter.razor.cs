@@ -1,22 +1,24 @@
 ﻿using System.Text;
 using DessertRate.Models;
-using FoundryRulesAndUnits.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace DessertRate.Pages;
 public class CounterBase : ComponentBase
 {
+    [Inject] HttpClient Http { get; set; }
     protected RatingModel RatingModel = new();
     protected int CurrentCount { get; set; } = 0;
     protected string Name { get; set; } = string.Empty;
     protected string Email { get; set; } = string.Empty;
     protected string Message { get; set; } = string.Empty;
+    protected List<RatingRow> RatingRows = [];
 
 
-    // protected override async Task OnInitializedAsync()
-    // {
-    // }    
+    protected override void OnInitialized()
+    {
+        RatingRows = RatingModel.GetRatingRows();
+    }
 
     protected void HandleValidSubmit(EditContext editContext)
     {
@@ -27,11 +29,11 @@ public class CounterBase : ComponentBase
         // var data = RatingModel.EncodePropertyNamesAsCSV();
 
         var data = new StringBuilder();
-        foreach (var item in RatingModel.ratingRows)
+        foreach (var item in RatingModel.RatingRows)
         {
             // data += CodingExtensions.Dehydrate(item, true);
             // data += item.EncodePropertyDataAsCSV();
-            data.Append(item.dessertID).Append(',').AppendLine($"{item.ranking}");
+            data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
         }
 
         Message = data.ToString();
@@ -47,24 +49,30 @@ public class CounterBase : ComponentBase
 
     protected void ClickPlus(RatingRow row)
     {
-        if (row.ranking < RatingModel.ratingRows.Count) row.ranking += 1;
+        // if (row.ranking < RatingModel.ratingRows.Count) row.ranking += 1;
+        row.Ranking += 1;
+        Console.WriteLine($"click plus {row.Ranking}");
         RatingModel.Validate();
+        // StateHasChanged();
     }
 
     protected void ClickMinus(RatingRow row)
     {
-        if (row.ranking > 1) row.ranking -= 1;
+        // if (row.ranking > 1) row.ranking -= 1;
+        row.Ranking -= 1;
+        Console.WriteLine($"click minus {row.Ranking}");
         RatingModel.Validate();
+        // StateHasChanged();
     }
 
     protected void ClickSortID()
     {
-        RatingModel.DoSortID();
+        RatingRows = RatingModel.DoSortID();
     }
 
     protected void ClickSortRank()
     {
-        RatingModel.DoSortRank();
+        RatingRows = RatingModel.DoSortRank();
     }
     protected void IncrementCount()
     {
@@ -74,7 +82,7 @@ public class CounterBase : ComponentBase
 
     protected void OnChangeName(ChangeEventArgs args)
     {
-        RatingModel.name = $"{args.Value}";
+        RatingModel.Name = $"{args.Value}";
         Email = $"{args.Value}@somerandomplace222.com";
     }
 
