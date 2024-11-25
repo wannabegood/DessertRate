@@ -56,8 +56,8 @@ public class CounterBase : ComponentBase
 
     protected void ClickPlus(RatingRow row)
     {
-        // if (row.ranking < RatingModel.ratingRows.Count) row.ranking += 1;
-        row.Ranking += 1;
+        if (row.Ranking < RatingModel.RatingRows.Count) row.Ranking += 1;
+        // row.Ranking += 1;
         Console.WriteLine($"click plus {row.Ranking}");
         RatingModel.Validate();
         // StateHasChanged();
@@ -65,8 +65,8 @@ public class CounterBase : ComponentBase
 
     protected void ClickMinus(RatingRow row)
     {
-        // if (row.ranking > 1) row.ranking -= 1;
-        row.Ranking -= 1;
+        if (row.Ranking > 1) row.Ranking -= 1;
+        // row.Ranking -= 1;
         Console.WriteLine($"click minus {row.Ranking}");
         RatingModel.Validate();
         // StateHasChanged();

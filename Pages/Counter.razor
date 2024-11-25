@@ -4,8 +4,6 @@
 
 <PageTitle>Dessert Rate</PageTitle>
 
-<PageTitle>Rankings</PageTitle>
-
 <div class="p-2 sticky-top action-bar">
     <div class="d-flex flex-row align-items-center">
         <div>
@@ -23,9 +21,10 @@
 </div>
 
 <div class="mt-2 mb-4">
-    <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)</div>
-    <EditForm action="https://formspree.io/f/xzzbaajv" OnValidSubmit="@HandleValidSubmit" method="POST"
-        Model="@RatingModel">
+    <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)
+        <small>v1.0.2</small>
+    </div>
+    <EditForm OnValidSubmit="@HandleValidSubmit" method="POST" Model="@RatingModel">
 
         <ul class="mt-4 list-group">
             @foreach (var item in RatingRows)

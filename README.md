@@ -1,6 +1,11 @@
 dotnet publish -p:CompressionEnabled=false
 
-zip files in bin\Release\net8.0\publish\wwwroot\*
-upload to https://static.app/sites/03wvb4gd8c/domains
+remove files from wannabegood.github.io project.
+copy files in bin\Release\net8.0\publish\wwwroot\* to wannabegood.github.io project.
+rename _framework folder to scripts
+update scripts/blazor.webassembly.js; replace all "_framework" with "scripts"
+update index.html replace all "_framework" with "scripts"
 
-URL: https://dessert.static.domains/
+wait for github pages new deployment
+
+URL:  wannabegood.github.io
