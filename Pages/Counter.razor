@@ -4,9 +4,10 @@
 
 <PageTitle>Dessert Rate</PageTitle>
 
-<PageTitle>Rankings</PageTitle>
-
-<div class="p-2 sticky-top action-bar">
+<div class="d-flex flex-row justify-content-center">
+    <sup>Brownies (11/28/24)</sup>
+</div>
+<div class="p-2 sticky-top action-bar" style="background-color: white">
     <div class="d-flex flex-row align-items-center">
         <div>
             <span class="title-text">Sort By:&nbsp;</span>
@@ -24,37 +25,39 @@
 
 <div class="mt-2 mb-4">
     <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)</div>
-    <EditForm action="https://formspree.io/f/xzzbaajv" OnValidSubmit="@HandleValidSubmit" method="POST"
-        Model="@RatingModel">
-
+    <EditForm OnValidSubmit="@HandleValidSubmit" method="POST" Model="@RatingModel">
         <ul class="mt-4 list-group">
-            @foreach (var item in RatingRows)
+            @foreach (var row in RatingRows)
             {
                 <li class="mb-2 list-group-item">
                     <div class="d-flex flex-row align-items-center">
                         <div>
-                            <div class="h6 title-text">@item.DessertID</div>
-                            <img src="@item.ImageURL" width="180" height="120" class="dessert-image rounded" alt="image1"
+                            <div class="h6 title-text">@row.DessertID</div>
+                            <img src="@row.ImageURL" width="180" height="120" class="dessert-image rounded" alt="image1"
                                 title="image1" />
                         </div>
                         <div class="ms-4">
                             <label>
                                 <div>Rank:</div>
-                                <InputNumber id="value" @bind-Value="item.Ranking" class="rank-input rounded" min="1"
-                                    max="@RatingModel.RatingRows.Count" @key="item.DessertID" />
+                                <select id="value" class="rank-input rounded" @key="row.DessertID"
+                                    style="width:50px;font-size: 16pt;" @onchange="@((evt)=>OnChangeRating(evt, row))">
+                                    @for (var i = 1; i < RatingRows.Count + 1; i++)
+                                    {
+                                        <option selected="@(i==row.Ranking)" value=@i>@i</option>
+                                    }
+                                </select>
                             </label>
                         </div>
                         <div class="ms-4">
                             <div>&nbsp;</div>
                             <div>
-                                <button type="button" class="btn btn-primary" @onclick="@((e)=>ClickPlus(item))"><span
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="@((e)=>ClickPlus(row))"><span
                                         class="display-6">&#9650;</span></button>
                             </div>
                             <div class="mt-1">
-                                <button type="button" class="btn btn-primary" @onclick="@((e)=>ClickMinus(item))"><span
-                                        class="display-6">&#9660;</span></button>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                    @onclick="@((e)=>ClickMinus(row))"><span class="display-6">&#9660;</span></button>
                             </div>
-
                         </div>
                     </div>
                 </li>
@@ -74,7 +77,6 @@
                         </label>
                     </div>
                     <button class="btn btn-success" type="submit"><span class="display-5">Save</span></button>
-                    @* <button disabled="@GetSubmitDisabled()" class="btn btn-primary" type="submit">Vote!</button> *@
 
                 </div>
             }
@@ -94,9 +96,9 @@
 <div class="d-flex justify-content-center">
     <form action="https://formspree.io/f/xzzbaajv" method="POST">
         <input type="hidden" name="email" @bind-value="@Email">
-        <textarea style="visibility: hidden" name="message">
+        <textarea style="visibility: hidden;" name="message">
             @Message
-    </textarea>
+        </textarea>
         <button disabled="@GetSubmitDisabled()" class="btn btn-primary btn-lg" type="submit">Vote!</button>
     </form>
 </div>

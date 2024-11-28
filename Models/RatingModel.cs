@@ -94,13 +94,13 @@ public class RatingModel
         return Valid;
     }
 
-    public List<RatingRow> GetRatingRows()
+    public List<RatingRow> GetRatingRows(List<string> imageUrls)
     {
         Console.WriteLine("In GetRatingRows");
         RatingRows = [];
         var cnt = 1;
         var index = 1;
-        foreach (var imageLink in ImageLinks)
+        foreach (var imageLink in imageUrls)
         {
             var ratingRow = new RatingRow()
             {
