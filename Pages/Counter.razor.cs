@@ -22,54 +22,33 @@ public class CounterBase : ComponentBase
         RatingRows = RatingModel.GetRatingRows(ImageUrls);
     }
 
-    // protected override void OnInitialized()
-    // {
-    //     RatingRows = RatingModel.GetRatingRows();
-    // }
-
     protected void HandleValidSubmit(EditContext editContext)
     {
+        Console.WriteLine($"HandleValidSubmit");
+
         RatingModel.DoSortID();
 
-        // var json = RatingModel.ToJSON();
-
-        // var data = RatingModel.EncodePropertyNamesAsCSV();
-
         var data = new StringBuilder();
-        foreach (var item in RatingModel.RatingRows)
+        foreach (var item in RatingRows)
         {
-            // data += CodingExtensions.Dehydrate(item, true);
-            // data += item.EncodePropertyDataAsCSV();
             data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
         }
 
         Message = data.ToString();
-
-        // Message = json;
-
-        // await AzureBlobService.UploadData("november2022", "data", $"{RatingModel.name}.json", json);
-
-        // NavManager.NavigateTo("/after-save");
-
-        // Process the valid form
     }
 
     protected void ClickPlus(RatingRow row)
     {
         if (row.Ranking < RatingModel.RatingRows.Count) row.Ranking += 1;
-        // row.Ranking += 1;
         Console.WriteLine($"click plus {row.Ranking}");
         RatingModel.Validate();
-        // StateHasChanged();
     }
 
     protected void ClickMinus(RatingRow row)
     {
         if (row.Ranking > 1) row.Ranking -= 1;
-        // row.Ranking -= 1;
         Console.WriteLine($"click minus {row.Ranking}");
         RatingModel.Validate();
-        // StateHasChanged();
     }
 
     protected void ClickSortID()
@@ -87,10 +66,24 @@ public class CounterBase : ComponentBase
         Message = $"{CurrentCount}";
     }
 
+    protected void OnChangeRating(ChangeEventArgs args, RatingRow row)
+    {
+        // Console.WriteLine($"OnChangeRating {row.DessertID}={row.Ranking}");
+        Console.WriteLine($"OnChangeRating Value={args.Value.ToString()}");
+        row.Ranking = int.Parse(args.Value.ToString());
+        RatingModel.Validate();
+
+
+    }
+    // protected void OnChangeRating(RatingRow row)
+    // {
+    //     Console.WriteLine($"OnChangeRating {row.DessertID}={row.Ranking}");
+    // }
+
     protected void OnChangeName(ChangeEventArgs args)
     {
         RatingModel.Name = $"{args.Value}";
-        Email = $"{args.Value}@somerandomplace222.com";
+        Email = $"{args.Value}@somerandomplace.com";
     }
 
     protected bool GetSubmitDisabled()
