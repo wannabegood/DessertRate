@@ -96,7 +96,7 @@
 <div class="d-flex justify-content-center">
     <form action="https://formspree.io/f/xzzbaajv" method="POST">
         <input type="hidden" name="email" @bind-value="@Email">
-        <textarea style="visibility: visible;" name="message">
+        <textarea style="visibility: hidden;" name="message">
             @Message
         </textarea>
         <button disabled="@GetSubmitDisabled()" class="btn btn-primary btn-lg" type="submit">Vote!</button>
