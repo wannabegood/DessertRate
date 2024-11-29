@@ -40,7 +40,7 @@
                             <label>
                                 <div>Rank:</div>
                                 <select id="value" class="rank-input rounded" @key="row.DessertID"
-                                    style="width:50px;font-size: 16pt;" @onchange="@((evt)=>OnChangeRating(evt, row))">
+                                    style="width:80px;font-size: 16pt;" @onchange="@((evt)=>OnChangeRating(evt, row))">
                                     @for (var i = 1; i < RatingRows.Count + 1; i++)
                                     {
                                         <option selected="@(i==row.Ranking)" value=@i>@i</option>
