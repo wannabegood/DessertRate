@@ -3,11 +3,14 @@ using System.Text;
 using DessertRate.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 
 namespace DessertRate.Pages;
+
 public class CounterBase : ComponentBase
 {
     [Inject] HttpClient Http { get; set; }
+    [Inject] protected IJSRuntime JS { get; set; }
     protected RatingModel RatingModel = new();
     protected int CurrentCount { get; set; } = 0;
     protected string Name { get; set; } = string.Empty;
@@ -15,6 +18,8 @@ public class CounterBase : ComponentBase
     protected string Message { get; set; } = string.Empty;
     protected List<RatingRow> RatingRows = [];
     protected List<string> ImageUrls = [];
+    protected ElementReference ExternalForm;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -24,17 +29,17 @@ public class CounterBase : ComponentBase
 
     protected void HandleValidSubmit(EditContext editContext)
     {
-        Console.WriteLine($"HandleValidSubmit");
+        // Console.WriteLine($"HandleValidSubmit");
 
-        RatingModel.DoSortID();
+        // RatingModel.DoSortID();
 
-        var data = new StringBuilder();
-        foreach (var item in RatingRows)
-        {
-            data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
-        }
+        // var data = new StringBuilder();
+        // foreach (var item in RatingRows)
+        // {
+        //     data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
+        // }
 
-        Message = data.ToString();
+        // Message = data.ToString();
     }
 
     protected void ClickPlus(RatingRow row)
@@ -86,11 +91,42 @@ public class CounterBase : ComponentBase
         Email = $"{args.Value}@somerandomplace.com";
     }
 
+    protected bool IsVoteDisabled()
+    {
+        Console.WriteLine("in is vote disabled");
+        return !RatingModel.Name.Trim().Any() || !RatingModel.Valid;
+    }
+
     protected bool GetSubmitDisabled()
     {
         Console.WriteLine("in get Submit disabled");
         return !(Name.Trim().Length > 0);
     }
 
+    // Called when you want to finalize/preprocess then submit the form
+    protected async Task SubmitFormWithPreprocessingAsync()
+    {
+        // ...existing preprocessing logic...
+        // e.g. prepare Email/Message, validate, etc.
+
+        // Call JS to submit the form element
+        await JS.InvokeVoidAsync("submitForm", ExternalForm);
+    }
+
+    // Example: call from your existing ClickSave
+    protected async Task ClickSave()
+    {
+        RatingModel.DoSortID();
+
+        var data = new StringBuilder();
+        foreach (var item in RatingRows)
+        {
+            data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
+        }
+
+        Message = data.ToString();
+        await Task.Delay(250); // Small delay to ensure Message is updated
+        await SubmitFormWithPreprocessingAsync();
+    }
 
 }
