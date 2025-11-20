@@ -27,21 +27,6 @@ public class CounterBase : ComponentBase
         RatingRows = RatingModel.GetRatingRows(ImageUrls);
     }
 
-    protected void HandleValidSubmit(EditContext editContext)
-    {
-        // Console.WriteLine($"HandleValidSubmit");
-
-        // RatingModel.DoSortID();
-
-        // var data = new StringBuilder();
-        // foreach (var item in RatingRows)
-        // {
-        //     data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
-        // }
-
-        // Message = data.ToString();
-    }
-
     protected void ClickPlus(RatingRow row)
     {
         if (row.Ranking < RatingModel.RatingRows.Count) row.Ranking += 1;
@@ -106,10 +91,6 @@ public class CounterBase : ComponentBase
     // Called when you want to finalize/preprocess then submit the form
     protected async Task SubmitFormWithPreprocessingAsync()
     {
-        // ...existing preprocessing logic...
-        // e.g. prepare Email/Message, validate, etc.
-
-        // Call JS to submit the form element
         await JS.InvokeVoidAsync("submitForm", ExternalForm);
     }
 
