@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
 using DessertRate.Models;
+using DessertRate.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -10,8 +11,9 @@ namespace DessertRate.Pages;
 public class CounterBase : ComponentBase
 {
     [Inject] HttpClient Http { get; set; }
+    [Inject] IConfigService ConfigService { get; set; }
     [Inject] protected IJSRuntime JS { get; set; }
-    protected RatingModel RatingModel = new();
+    protected RatingModel RatingModel;
     protected int CurrentCount { get; set; } = 0;
     protected string Name { get; set; } = string.Empty;
     protected string Email { get; set; } = string.Empty;
@@ -23,8 +25,11 @@ public class CounterBase : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        ImageUrls = await Http.GetFromJsonAsync<List<string>>("sample-data/image-urls.json");
-        RatingRows = RatingModel.GetRatingRows(ImageUrls);
+        // Initialize RatingModel with injected ConfigService
+        RatingModel = new RatingModel(ConfigService);
+
+        // Load image URLs from the configuration service
+        RatingRows = await RatingModel.LoadImageURLsAsync();
     }
 
     protected void ClickPlus(RatingRow row)

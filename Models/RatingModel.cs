@@ -1,8 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
+using DessertRate.Services;
 using static System.Net.WebRequestMethods;
 namespace DessertRate.Models;
+
+#nullable enable
 
 public class RatingRow
 {
@@ -20,7 +23,9 @@ public class RatingModel
     public string Name { get; set; } = "";
     public bool Valid { get; set; }
     public List<RatingRow> RatingRows { get; set; } = [];
-    private List<string> ImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/dpbd5sx0c5i8ygfkgxeko/Dessert-01.jpg?rlkey=6o9mj8bxticx37pwfhrumx459&dl=0",
+
+    // Fallback URLs kept for offline development or when external loading fails
+    private List<string> FallbackImageLinks { get; set; } = ["https://dl.dropboxusercontent.com/scl/fi/dpbd5sx0c5i8ygfkgxeko/Dessert-01.jpg?rlkey=6o9mj8bxticx37pwfhrumx459&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/8tc8cw4rq0208ukh2nxdh/Dessert-02.jpg?rlkey=b57qpoisx1hbq2kho99k9lqa1&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/nvfb9yngovpjuqyxm8okb/Dessert-03.jpg?rlkey=7qk3zc2q74jbibo027w79q4pv&dl=0",
     "https://dl.dropboxusercontent.com/scl/fi/n36pasfa593gqat0n5ir0/Dessert-04.jpg?rlkey=yb2i547fosekqbfs8v1l873sp&dl=0",
@@ -31,15 +36,55 @@ public class RatingModel
     "https://dl.dropboxusercontent.com/scl/fi/huokuyk33yq2fzd9dn71z/Dessert-09.jpg?rlkey=7whawzg6aha3bm5by44dmydh8&st=g73yc5fb&dl=0"
     ];
 
-
     private EnvConfig _config;
+    private IConfigService? _configService;
 
     public RatingModel()
     {
         _config = new EnvConfig();
         Valid = Validate();
     }
-    // private string GetImgSrc(string name)
+
+    // Constructor that accepts IConfigService for dependency injection
+    public RatingModel(IConfigService configService)
+    {
+        _config = new EnvConfig();
+        _configService = configService;
+        Valid = Validate();
+    }
+
+    /// <summary>
+    /// Loads image URLs from the configuration service asynchronously.
+    /// Attempts to fetch from GitHub first, falls back to local config, then fallback URLs.
+    /// </summary>
+    public async Task<List<RatingRow>> LoadImageURLsAsync()
+    {
+        try
+        {
+            if (_configService == null)
+            {
+                Console.WriteLine("ConfigService not available, using fallback URLs");
+                return GetRatingRows(FallbackImageLinks);
+            }
+
+            var imageLinks = await _configService.GetImageLinksAsync();
+            if (imageLinks.Count > 0)
+            {
+                Console.WriteLine($"Loaded {imageLinks.Count} image URLs from configuration service");
+                return GetRatingRows(imageLinks);
+            }
+            else
+            {
+                Console.WriteLine("No image URLs found in configuration, using fallback URLs");
+                return GetRatingRows(FallbackImageLinks);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading image URLs: {ex.Message}. Using fallback URLs.");
+            return GetRatingRows(FallbackImageLinks);
+        }
+    }
     // {
     //     var src = $"{_config.ImgBaseURL}/{name}";
     //     return src;
