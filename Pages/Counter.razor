@@ -5,7 +5,7 @@
 <PageTitle>Dessert Rate</PageTitle>
 
 <div class="d-flex flex-row justify-content-center">
-    <sup>Brownies (11/28/24)</sup>
+    <sup>Tart (11/27/25)</sup>
 </div>
 <div class="p-2 sticky-top action-bar" style="background-color: white">
     <div class="d-flex flex-row align-items-center">
@@ -25,7 +25,7 @@
 
 <div class="mt-2 mb-4">
     <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)</div>
-    <EditForm OnValidSubmit="@HandleValidSubmit" method="POST" Model="@RatingModel">
+    <EditForm method="POST" Model="@RatingModel">
         <ul class="mt-4 list-group">
             @foreach (var row in RatingRows)
             {
@@ -40,10 +40,10 @@
                             <label>
                                 <div>Rank:</div>
                                 <select id="value" class="rank-input rounded" @key="row.DessertID"
-                                    style="width:80px;font-size: 16pt;" @onchange="@((evt)=>OnChangeRating(evt, row))">
+                                    style="width:80px;font-size: 16pt;" @onchange="@((evt) => OnChangeRating(evt, row))">
                                     @for (var i = 1; i < RatingRows.Count + 1; i++)
                                     {
-                                        <option selected="@(i==row.Ranking)" value=@i>@i</option>
+                                        <option selected="@(i == row.Ranking)" value=@i>@i</option>
                                     }
                                 </select>
                             </label>
@@ -51,12 +51,12 @@
                         <div class="ms-4">
                             <div>&nbsp;</div>
                             <div>
-                                <button type="button" class="btn btn-sm btn-primary" @onclick="@((e)=>ClickPlus(row))"><span
-                                        class="display-6">&#9650;</span></button>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                    @onclick="@((e) => ClickPlus(row))"><span class="display-6">&#9650;</span></button>
                             </div>
                             <div class="mt-1">
                                 <button type="button" class="btn btn-sm btn-primary"
-                                    @onclick="@((e)=>ClickMinus(row))"><span class="display-6">&#9660;</span></button>
+                                    @onclick="@((e) => ClickMinus(row))"><span class="display-6">&#9660;</span></button>
                             </div>
                         </div>
                     </div>
@@ -76,7 +76,8 @@
                                 maxLength="30" />
                         </label>
                     </div>
-                    <button class="btn btn-success" type="submit"><span class="display-5">Save</span></button>
+                    <button class="btn btn-success" type="button" onclick="@ClickSave" disabled="@IsVoteDisabled()"><span
+                            class="display-5">Vote</span></button>
 
                 </div>
             }
@@ -92,14 +93,12 @@
 
 </div>
 
-@* <input type="text" name="name" @oninput="@OnChangeName" @bind-value="@Name"> *@
 <div class="d-flex justify-content-center">
 
-    <form action="https://formkeep.com/f/b7297b9b267f" method="POST">
+    <form @ref="ExternalForm" action="https://formkeep.com/f/b7297b9b267f" method="POST">
         <input type="hidden" name="email" @bind-value="@Email">
         <textarea style="visibility: hidden;" name="message">
             @Message
         </textarea>
-        <button disabled="@GetSubmitDisabled()" class="btn btn-primary btn-lg" type="submit">Vote!</button>
     </form>
 </div>
