@@ -13,6 +13,4 @@ wait for github pages new deployment
 
 URL:  wannabegood.github.io
 
-https://formspree.io/f/xzzbaajv
-
 https://formkeep.com/f/b7297b9b267f
