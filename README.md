@@ -9,6 +9,8 @@ rename _framework folder to scripts
 update scripts/blazor.webassembly.js; replace all "_framework" with "scripts"
 update index.html replace all "_framework" with "scripts"
 
+Use dl.dropboxusercontent.com!
+
 wait for github pages new deployment
 
 URL:  wannabegood.github.io
