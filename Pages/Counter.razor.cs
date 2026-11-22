@@ -1,43 +1,85 @@
-﻿using System.Net.Http.Json;
-using System.Text;
+﻿
+using System.Net.Http.Json;
 using DessertRate.Models;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.JSInterop;
 
 namespace DessertRate.Pages;
 
 public class CounterBase : ComponentBase
 {
-    [Inject] HttpClient Http { get; set; }
-    [Inject] protected IJSRuntime JS { get; set; }
+    private const string ApiBaseUrl =
+        "https://dessert-scores.gtfullton.workers.dev/";
+
+    [Inject]
+    protected HttpClient Http { get; set; } = default!;
+
     protected RatingModel RatingModel = new();
-    protected int CurrentCount { get; set; } = 0;
+
+    protected int ContestId { get; set; }
+
     protected string Name { get; set; } = string.Empty;
-    protected string Email { get; set; } = string.Empty;
-    protected string Message { get; set; } = string.Empty;
+
     protected List<RatingRow> RatingRows = [];
-    protected List<string> ImageUrls = [];
-    protected ElementReference ExternalForm;
 
+    protected bool IsSubmitting { get; set; }
 
+    protected string SubmissionMessage { get; set; } = "";
+
+    protected string LoadError { get; set; } = "";
+
+    protected bool VotingOpen { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        ImageUrls = await Http.GetFromJsonAsync<List<string>>("sample-data/image-urls.json");
-        RatingRows = RatingModel.GetRatingRows(ImageUrls);
+        try
+        {
+            var response =
+                await Http.GetFromJsonAsync<ContestApiResponse>(
+                    $"{ApiBaseUrl}/api/contest");
+
+            if (response?.Contest == null ||
+                response.Desserts == null ||
+                response.Desserts.Count == 0)
+            {
+                LoadError = "No contest or desserts are available.";
+                return;
+            }
+
+            ContestId = response.Contest.ContestId;
+
+            VotingOpen = response.Contest.VotingOpen == 1;
+
+            RatingRows = response.Desserts
+                .Select((dessert, index) => new RatingRow
+                {
+                    DessertID = dessert.DessertId,
+                    Name = dessert.DisplayName,
+                    ImageURL = dessert.ImageUrl,
+                    Ranking = index + 1
+                })
+                .ToList();
+
+            RatingModel.RatingRows = RatingRows;
+            RatingModel.Validate();
+        }
+        catch (Exception ex)
+        {
+            LoadError = $"Unable to load contest: {ex.Message}";
+        }
     }
 
     protected void ClickPlus(RatingRow row)
     {
-        if (row.Ranking < RatingModel.RatingRows.Count) row.Ranking += 1;
-        Console.WriteLine($"click plus {row.Ranking}");
+        if (row.Ranking < RatingRows.Count)
+            row.Ranking++;
+
         RatingModel.Validate();
     }
 
     protected void ClickMinus(RatingRow row)
     {
-        if (row.Ranking > 1) row.Ranking -= 1;
-        Console.WriteLine($"click minus {row.Ranking}");
+        if (row.Ranking > 1)
+            row.Ranking--;
+
         RatingModel.Validate();
     }
 
@@ -50,64 +92,132 @@ public class CounterBase : ComponentBase
     {
         RatingRows = RatingModel.DoSortRank();
     }
-    protected void IncrementCount()
+
+    protected void OnChangeRating(
+        ChangeEventArgs args,
+        RatingRow row)
     {
-        CurrentCount++;
-        Message = $"{CurrentCount}";
+        if (int.TryParse(args.Value?.ToString(), out var rank))
+        {
+            row.Ranking = rank;
+            RatingModel.Validate();
+        }
     }
-
-    protected void OnChangeRating(ChangeEventArgs args, RatingRow row)
-    {
-        // Console.WriteLine($"OnChangeRating {row.DessertID}={row.Ranking}");
-        Console.WriteLine($"OnChangeRating Value={args.Value.ToString()}");
-        row.Ranking = int.Parse(args.Value.ToString());
-        RatingModel.Validate();
-
-
-    }
-    // protected void OnChangeRating(RatingRow row)
-    // {
-    //     Console.WriteLine($"OnChangeRating {row.DessertID}={row.Ranking}");
-    // }
 
     protected void OnChangeName(ChangeEventArgs args)
     {
-        RatingModel.Name = $"{args.Value}";
-        Email = $"{args.Value}@somerandomplace.com";
+        Name = args.Value?.ToString() ?? "";
+        RatingModel.Name = Name;
     }
 
     protected bool IsVoteDisabled()
     {
-        Console.WriteLine("in is vote disabled");
-        return !RatingModel.Name.Trim().Any() || !RatingModel.Valid;
+        return !VotingOpen ||
+               IsSubmitting ||
+               Name.Trim().Length < 3 ||
+               !RatingModel.Valid;
     }
-
-    protected bool GetSubmitDisabled()
-    {
-        Console.WriteLine("in get Submit disabled");
-        return !(Name.Trim().Length > 0);
-    }
-
-    // Called when you want to finalize/preprocess then submit the form
-    protected async Task SubmitFormWithPreprocessingAsync()
-    {
-        await JS.InvokeVoidAsync("submitForm", ExternalForm);
-    }
-
-    // Example: call from your existing ClickSave
     protected async Task ClickSave()
     {
-        RatingModel.DoSortID();
+        if (IsVoteDisabled())
+            return;
 
-        var data = new StringBuilder();
-        foreach (var item in RatingRows)
+        IsSubmitting = true;
+        SubmissionMessage = "";
+
+        try
         {
-            data.Append(item.DessertID).Append(',').AppendLine($"{item.Ranking}");
-        }
+            RatingModel.DoSortID();
+            RatingRows = RatingModel.RatingRows;
 
-        Message = data.ToString();
-        await Task.Delay(250); // Small delay to ensure Message is updated
-        await SubmitFormWithPreprocessingAsync();
+            var request = new SubmissionRequest
+            {
+                ContestId = ContestId,
+                ParticipantName = Name.Trim(),
+                Rankings = RatingRows.Select(row =>
+                    new RankingRequest
+                    {
+                        DessertId = row.DessertID,
+                        Rank = row.Ranking
+                    }).ToList()
+            };
+
+            var response = await Http.PostAsJsonAsync(
+                $"{ApiBaseUrl}/api/submissions",
+                request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                SubmissionMessage =
+                    "Your ballot has been saved! " +
+                    "You can submit again anytime to change your rankings.";
+            }
+            else
+            {
+                var error = await response.Content
+                    .ReadFromJsonAsync<ApiError>();
+
+                SubmissionMessage =
+                    error?.Error ??
+                    $"Submission failed: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            SubmissionMessage =
+                $"Unable to submit your ballot: {ex.Message}";
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
 
+    // API DTOs
+
+    protected class ContestApiResponse
+    {
+        public ContestDto Contest { get; set; } = new();
+
+        public List<DessertDto> Desserts { get; set; } = [];
+    }
+
+    protected class ContestDto
+    {
+        public int ContestId { get; set; }
+
+        public string Name { get; set; } = "";
+
+        public int VotingOpen { get; set; }
+    }
+
+    protected class DessertDto
+    {
+        public string DessertId { get; set; } = "";
+
+        public string DisplayName { get; set; } = "";
+
+        public string ImageUrl { get; set; } = "";
+    }
+
+    protected class SubmissionRequest
+    {
+        public int ContestId { get; set; }
+
+        public string ParticipantName { get; set; } = "";
+
+        public List<RankingRequest> Rankings { get; set; } = [];
+    }
+
+    protected class RankingRequest
+    {
+        public string DessertId { get; set; } = "";
+
+        public int Rank { get; set; }
+    }
+
+    protected class ApiError
+    {
+        public string Error { get; set; } = "";
+    }
 }
