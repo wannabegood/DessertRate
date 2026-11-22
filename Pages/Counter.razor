@@ -2,10 +2,17 @@
 @inherits CounterBase
 @namespace DessertRate.Pages
 
-<PageTitle>Dessert Rate 2025</PageTitle>
+<PageTitle>Dessert Rate 2026</PageTitle>
+
+@if (!string.IsNullOrWhiteSpace(LoadError))
+{
+    <div class="alert alert-danger">
+        @LoadError
+    </div>
+}
 
 <div class="d-flex flex-row justify-content-center">
-    <sup>Tart (11/27/25)</sup>
+    <sup>Coconut (11/26/26)</sup>
 </div>
 <div class="p-2 sticky-top action-bar" style="background-color: white">
     <div class="d-flex flex-row align-items-center">
@@ -14,91 +21,90 @@
         </div>
         <div>
             <button class="btn btn-sm btn-primary" type="button" @onclick="ClickSortID"><span class="display-6">
-                    Dessert #</span></button>
-        </div>
-        <div class="ms-2">
-            <button class="btn btn-sm btn-primary" type="button" @onclick="ClickSortRank"><span class="display-6">
+                Dessert #</span></button>
+            </div>
+            <div class="ms-2">
+                <button class="btn btn-sm btn-primary" type="button" @onclick="ClickSortRank"><span class="display-6">
                     Rank</span></button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="mt-2 mb-4">
-    <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)</div>
-    <EditForm method="POST" Model="@RatingModel">
-        <ul class="mt-4 list-group">
-            @foreach (var row in RatingRows)
-            {
-                <li class="mb-2 list-group-item">
-                    <div class="d-flex flex-row align-items-center">
+        <div class="mt-2 mb-4">
+            <div class="display-7 title-text">Rank Desserts (1 = Favorite, @RatingModel.RatingRows.Count = Least Favorite)</div>
+            <EditForm Model="@RatingModel">
+                <ul class="mt-4 list-group">
+                    @foreach (var row in RatingRows)
+                    {
+                        <li class="mb-2 list-group-item">
+                            <div class="d-flex flex-row align-items-center">
+                                <div>
+                                    <div class="h6 title-text">@row.DessertID</div>
+                                    <img src="@row.ImageURL" width="180" height="120" class="dessert-image rounded" alt="image1"
+                                         title="image1" />
+                                </div>
+                                <div class="ms-4">
+                                    <label>
+                                        <div>Rank:</div>
+                                        <select id="value" class="rank-input rounded" @key="row.DessertID"
+                                                style="width:80px;font-size: 16pt;" @onchange="@((evt) => OnChangeRating(evt, row))">
+                                            @for (var i = 1; i < RatingRows.Count + 1; i++)
+                                            {
+                                                <option selected="@(i == row.Ranking)" value=@i>@i</option>
+                                            }
+                                        </select>
+                                    </label>
+                                </div>
+                                <div class="ms-4">
+                                    <div>&nbsp;</div>
+                                    <div>
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                                @onclick="@((e) => ClickPlus(row))"><span class="display-6">&#9650;</span></button>
+                                    </div>
+                                    <div class="mt-1">
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                                @onclick="@((e) => ClickMinus(row))"><span class="display-6">&#9660;</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <div class="d-flex justify-content-center">
+                    @if (RatingModel.Valid)
+                    {
                         <div>
-                            <div class="h6 title-text">@row.DessertID</div>
-                            <img src="@row.ImageURL" width="180" height="120" class="dessert-image rounded" alt="image1"
-                                title="image1" />
-                        </div>
-                        <div class="ms-4">
-                            <label>
-                                <div>Rank:</div>
-                                <select id="value" class="rank-input rounded" @key="row.DessertID"
-                                    style="width:80px;font-size: 16pt;" @onchange="@((evt) => OnChangeRating(evt, row))">
-                                    @for (var i = 1; i < RatingRows.Count + 1; i++)
-                                    {
-                                        <option selected="@(i == row.Ranking)" value=@i>@i</option>
-                                    }
-                                </select>
-                            </label>
-                        </div>
-                        <div class="ms-4">
-                            <div>&nbsp;</div>
-                            <div>
-                                <button type="button" class="btn btn-sm btn-primary"
-                                    @onclick="@((e) => ClickPlus(row))"><span class="display-6">&#9650;</span></button>
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <div class="mt-4 mb-4">
+                                <label><span class="title-text">Name:</span>
+                                    <InputText id="name" @bind-Value="Name" @oninput="@OnChangeName" placeholder="Type your name"
+                                               maxLength="30" />
+                                </label>
                             </div>
-                            <div class="mt-1">
-                                <button type="button" class="btn btn-sm btn-primary"
-                                    @onclick="@((e) => ClickMinus(row))"><span class="display-6">&#9660;</span></button>
-                            </div>
+                            <button class="btn btn-success" type="button" @onclick="ClickSave" disabled="@IsVoteDisabled()">
+
+                                <span class="display-5">
+                                    @(IsSubmitting ? "Saving..." : "Vote")
+                                </span>
+                            </button>
+                            @if (!string.IsNullOrWhiteSpace(SubmissionMessage))
+                            {
+                                <div class="alert alert-info mt-3">
+                                    @SubmissionMessage
+                                </div>
+                            }
                         </div>
-                    </div>
-                </li>
-            }
-        </ul>
-
-        <div class="d-flex justify-content-center">
-            @if (RatingModel.Valid)
-            {
-                <div>
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-                    <div class="mt-4 mb-4">
-                        <label><span class="title-text">Name:</span>
-                            <InputText id="name" @bind-Value="Name" @oninput="@OnChangeName" placeholder="Type your name"
-                                maxLength="30" />
-                        </label>
-                    </div>
-                    <button class="btn btn-success" type="button" onclick="@ClickSave" disabled="@IsVoteDisabled()"><span
-                            class="display-5">Vote</span></button>
-
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <div>You have a duplicate rank somewhere so you cannot save.</div>
+                            <div>Try sorting by rank to help.</div>
+                        </div>
+                    }
                 </div>
-            }
-            else
-            {
-                <div class="alert alert-warning" role="alert">
-                    <div>You have a duplicate rank somewhere so you cannot save.</div>
-                    <div>Try sorting by rank to help.</div>
-                </div>
-            }
+            </EditForm>
+
         </div>
-    </EditForm>
-
-</div>
-
-<div class="d-flex justify-content-center">
-
-    <form @ref="ExternalForm" action="https://formkeep.com/f/b7297b9b267f" method="POST">
-        <input type="hidden" name="email" @bind-value="@Email">
-        <textarea style="visibility: hidden;" name="message">
-            @Message
-        </textarea>
-    </form>
-</div>

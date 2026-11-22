@@ -80,17 +80,20 @@ public class RatingModel
         return RatingRows;
     }
 
+
     public bool Validate()
     {
-        var imageCount = RatingRows.Count;
-        var expectedRankTotal = imageCount * (imageCount + 1) / 2;
-        var actualTotal = 0;
-        RatingRows.ForEach((item) =>
-        {
-            actualTotal += item.Ranking;
-        });
+        var count = RatingRows.Count;
 
-        Valid = expectedRankTotal == actualTotal;
+        Valid = count > 0 &&
+                RatingRows.All(row =>
+                    row.Ranking >= 1 &&
+                    row.Ranking <= count) &&
+                RatingRows
+                    .Select(row => row.Ranking)
+                    .Distinct()
+                    .Count() == count;
+
         return Valid;
     }
 
