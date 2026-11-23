@@ -1,19 +1,28 @@
 1. On local machine run dotnet publish -p:CompressionEnabled=false in DessertRate.
 1. On local machine keep .git folder but remove files from wannabegood.github.io project (sibling folder to DessertRate)
 1. On local machine copy files in bin\Release\net8.0\publish\wwwroot\* to wannabegood.github.io project.
-2. Push to wannabegood.githup.io project.
+1. rename _framework folder to scripts
+1. update scripts/blazor.webassembly.js; replace all "_framework" with "scripts"
+1. update index.html replace all "_framework" with "scripts"
+1. Push to wannabegood.githup.io project (main branch)
 
-That's good enough for testing locally.
+*** IMPORTANT ***
+Use dl.dropboxusercontent.com in image names!!!!
 
-You need this on the main branch for deployment 2026:
-rename _framework folder to scripts
-update scripts/blazor.webassembly.js; replace all "_framework" with "scripts"
-update index.html replace all "_framework" with "scripts"
+https://dash.cloudflare.com/d72297d0edde80b39909290b703bfa75/workers/d1
+Update ImageUrl column after uploading images to dropbox.  Need to share to get link.
 
-Use dl.dropboxusercontent.com in image names
+Example URL:
+https://dl.dropboxusercontent.com/scl/fi/gbc91ksxf6qnnh59djuyd/Tart-09.jpg?rlkey=ji92txlfpush6cf1eravz0ou6&st=bxkx88xi&raw=1
 
-wait for github pages new deployment
+Change www to dl
+Change dropbox.com to dropboxusercontent.com
+Replace &dl=0 with &raw=1
 
-URL:  wannabegood.github.io
+Github url:  https://github.com/wannabegood/DessertRate
 
-https://formkeep.com/f/b7297b9b267f
+Application URL:  wannabegood.github.io
+
+After submissions are made, use Postman to access results.
+Copy/paste array of results in to a json file.
+Open json file in LibreOffice and easily sort results.
