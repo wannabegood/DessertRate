@@ -4,7 +4,7 @@
 1. rename _framework folder to scripts
 1. update scripts/blazor.webassembly.js; replace all "_framework" with "scripts"
 1. update index.html replace all "_framework" with "scripts"
-1. Push to wannabegood.githup.io project (main branch)
+1. Push to wannabegood.github.io project (main branch)
 
 *** IMPORTANT ***
 Use dl.dropboxusercontent.com in image names!!!!
@@ -21,11 +21,19 @@ Replace &dl=0 with &raw=1
 
 Github url:  https://github.com/wannabegood/DessertRate
 
-Application URL:  wannabegood.github.io
+Application URL:  https://wannabegood.github.io
 
-After submissions are made, use Postman to access results.
-Copy/paste array of results in to a json file.
-Open json file in LibreOffice and easily sort results.
+
+===============================================================
+dessert-image-urls
+
+cd dessert-image-urls
+
+Deploy index.html
+npx wrangler deploy
+
+Open
+https://dessert-image-urls.gtfullton.workers.dev
 
 =============================================================
 dessert-results
@@ -46,13 +54,7 @@ https://dessert-results.pages.dev/
 or
 https://c3532166.dessert-results.pages.dev/
 
-===============================================================
-dessert-image-urls
-
-cd dessert-image-urls
-
-Deploy index.html
-npx wrangler deploy
-
-Open
-https://dessert-image-urls.gtfullton.workers.dev
+If that doesn't work ...
+After submissions are made, use Postman to access results.
+Copy/paste array of results in to a json file.
+Open json file in LibreOffice and easily sort results.
