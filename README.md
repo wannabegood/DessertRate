@@ -46,4 +46,13 @@ https://dessert-results.pages.dev/
 or
 https://c3532166.dessert-results.pages.dev/
 
+===============================================================
+dessert-image-urls
 
+cd dessert-image-urls
+
+Deploy index.html
+npx wrangler deploy
+
+Open
+https://dessert-image-urls.gtfullton.workers.dev
