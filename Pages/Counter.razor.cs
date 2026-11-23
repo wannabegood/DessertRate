@@ -8,7 +8,7 @@ namespace DessertRate.Pages;
 public class CounterBase : ComponentBase
 {
     private const string ApiBaseUrl =
-        "https://dessert-scores.gtfullton.workers.dev/";
+        "https://dessert-scores.gtfullton.workers.dev";
 
     [Inject]
     protected HttpClient Http { get; set; } = default!;
@@ -149,7 +149,7 @@ public class CounterBase : ComponentBase
             if (response.IsSuccessStatusCode)
             {
                 SubmissionMessage =
-                    "Your ballot has been saved! " +
+                    "Your vote has been saved! " +
                     "You can submit again anytime to change your rankings.";
             }
             else
@@ -165,7 +165,7 @@ public class CounterBase : ComponentBase
         catch (Exception ex)
         {
             SubmissionMessage =
-                $"Unable to submit your ballot: {ex.Message}";
+                $"Unable to submit your vote: {ex.Message}";
         }
         finally
         {
