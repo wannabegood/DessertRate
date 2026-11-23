@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Update Dessert Image URL</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    body {
+      max-width: 480px;
+      margin: 2.5rem auto;
+      padding: 0 1rem;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 1.35rem;
+      margin-bottom: 1.25rem;
+    }
+    .field {
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      font-size: 0.9rem;
+    }
+    select,
+    input[type="url"],
+    button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.6rem 0.7rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #8886;
+    }
+    button {
+      margin-top: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    #status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      display: none;
+    }
+    #status.ok {
+      display: block;
+      background: #16a34a22;
+      border: 1px solid #16a34a88;
+    }
+    #status.err {
+      display: block;
+      background: #dc262622;
+      border: 1px solid #dc262688;
+    }
+    .meta {
+      font-size: 0.8rem;
+      opacity: 0.75;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Update Dessert Image URL</h1>
+
+  <form id="update-form">
+    <div class="field">
+      <label for="contest-select">Contest ID</label>
+      <select id="contest-select" required disabled>
+        <option value="">Loading contests...</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="dessert-select">Dessert ID</label>
+      <select id="dessert-select" required disabled>
+        <option value="">Loading desserts...</option>
+      </select>
+      <div id="current-url-hint" class="meta"></div>
+    </div>
+
+    <div class="field">
+      <label for="image-url">Image URL</label>
+      <input
+        id="image-url"
+        type="url"
+        placeholder="https://example.com/dessert.jpg"
+        required
+      />
+    </div>
+
+    <button id="submit-btn" type="submit" disabled>Update Image URL (PATCH)</button>
+  </form>
+
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <script>
+    const API_BASE = "https://dessert-scores.gtfullton.workers.dev/api";
+    const PATCH_URL = `${API_BASE}/update-image-url`;
+
+    const contestSelect = document.getElementById("contest-select");
+    const dessertSelect = document.getElementById("dessert-select");
+    const imageUrlInput = document.getElementById("image-url");
+    const submitBtn = document.getElementById("submit-btn");
+    const statusBox = document.getElementById("status");
+    const hintBox = document.getElementById("current-url-hint");
+
+    // Holds all dessert rows fetched from your API so we can filter by ContestId
+    // and extract distinct ContestId values.
+    let allDesserts = [];
+
+    function showStatus(message, isError = false) {
+      statusBox.textContent = message;
+      statusBox.className = isError ? "err" : "ok";
+    }
+
+    function populateDessertsForContest(contestId) {
+      const filtered = allDesserts.filter(
+        (d) => String(d.ContestId ?? d.contestId) === String(contestId)
+      );
+
+      dessertSelect.innerHTML = "";
+      if (filtered.length === 0) {
+        dessertSelect.innerHTML = `<option value="">No desserts for contest ${contestId}</option>`;
+        dessertSelect.disabled = true;
+        submitBtn.disabled = true;
+        hintBox.textContent = "";
+        return;
+      }
+
+      for (const row of filtered) {
+        const id = row.DessertId ?? row.dessertId;
+        const name = row.DisplayName ?? row.displayName ?? "";
+        const opt = document.createElement("option");
+        opt.value = id;
+        opt.textContent = name ? `${id} (${name})` : String(id);
+        opt.dataset.imageUrl = row.ImageUrl ?? row.imageUrl ?? "";
+        dessertSelect.appendChild(opt);
+      }
+
+      dessertSelect.disabled = false;
+      submitBtn.disabled = false;
+      syncHintFromSelection();
+    }
+
+    function syncHintFromSelection() {
+      const selectedOpt = dessertSelect.selectedOptions[0];
+      const existingUrl = selectedOpt?.dataset?.imageUrl || "";
+      hintBox.textContent = existingUrl
+        ? `Current ImageUrl: ${existingUrl}`
+        : "Current ImageUrl: (none)";
+    }
+
+    async function loadInitialData() {
+      try {
+        // Expects an array of dessert rows (or { results: [...] } from D1)
+        const res = await fetch(`${API_BASE}/desserts`);
+        if (!res.ok) {
+          throw new Error(`GET /api/desserts failed (${res.status})`);
+        }
+        const data = await res.json();
+        allDesserts = Array.isArray(data) ? data : (data.results ?? []);
+
+        const distinctContests = [
+          ...new Set(
+            allDesserts
+              .map((d) => d.ContestId ?? d.contestId)
+              .filter((v) => v !== undefined && v !== null)
+          ),
+        ].sort((a, b) => Number(a) - Number(b));
+
+        contestSelect.innerHTML = "";
+        if (distinctContests.length === 0) {
+          contestSelect.innerHTML = `<option value="">No contests found</option>`;
+          showStatus("Loaded desserts, but no ContestId values were found.", true);
+          return;
+        }
+
+        for (const cid of distinctContests) {
+          const opt = document.createElement("option");
+          opt.value = cid;
+          opt.textContent = `Contest ${cid}`;
+          contestSelect.appendChild(opt);
+        }
+
+        contestSelect.disabled = false;
+        populateDessertsForContest(distinctContests[0]);
+      } catch (err) {
+        contestSelect.innerHTML = `<option value="">Error loading</option>`;
+        dessertSelect.innerHTML = `<option value="">Error loading</option>`;
+        showStatus(`Failed to load options: ${err.message}`, true);
+      }
+    }
+
+    contestSelect.addEventListener("change", () => {
+      populateDessertsForContest(contestSelect.value);
+    });
+
+    dessertSelect.addEventListener("change", () => {
+      syncHintFromSelection();
+    });
+
+    document.getElementById("update-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        ContestId: Number(contestSelect.value),
+        DessertId: dessertSelect.value,
+        ImageUrl: imageUrlInput.value.trim(),
+      };
+
+      submitBtn.disabled = true;
+      showStatus("Sending PATCH request...", false);
+
+      try {
+        const res = await fetch(PATCH_URL, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const text = await res.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          parsed = text;
+        }
+
+        if (!res.ok) {
+          throw new Error(
+            typeof parsed === "string"
+              ? `HTTP ${res.status}: ${parsed}`
+              : `HTTP ${res.status}: ${parsed.error || JSON.stringify(parsed)}`
+          );
+        }
+
+        // Update local cache so switching dropdowns reflects the new URL immediately
+        const match = allDesserts.find(
+          (d) =>
+            String(d.ContestId ?? d.contestId) === String(payload.ContestId) &&
+            String(d.DessertId ?? d.dessertId) === String(payload.DessertId)
+        );
+        if (match) {
+          match.ImageUrl = payload.ImageUrl;
+          match.imageUrl = payload.ImageUrl;
+        }
+        syncHintFromSelection();
+        imageUrlInput.value = "";
+
+        showStatus(
+          `Updated ${payload.DessertId} (Contest ${payload.ContestId})\nNew ImageUrl: ${payload.ImageUrl}`,
+          false
+        );
+      } catch (err) {
+        showStatus(`Update failed: ${err.message}`, true);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    loadInitialData();
+  </script>
+</body>
+</html>
