@@ -26,3 +26,24 @@ Application URL:  wannabegood.github.io
 After submissions are made, use Postman to access results.
 Copy/paste array of results in to a json file.
 Open json file in LibreOffice and easily sort results.
+
+=============================================================
+dessert-results
+
+cd to dessert-results folder
+
+Add Secret
+npx wrangler pages secret put API_TOKEN --project-name=dessert-results
+
+Preview deployment
+npx wrangler pages deploy . --project-name=dessert-results   
+wrangler will give you a URL
+
+
+Production deployment
+npx wrangler pages deploy . --project-name=dessert-results --branch=main
+https://dessert-results.pages.dev/
+or
+https://c3532166.dessert-results.pages.dev/
+
+
