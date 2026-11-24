@@ -25,7 +25,7 @@ Application URL:  https://wannabegood.github.io
 
 
 ===============================================================
-dessert-image-urls
+dessert-image-urls (clear image urls, update image urls, clear sessions)
 
 cd dessert-image-urls
 

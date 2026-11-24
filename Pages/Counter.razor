@@ -78,23 +78,23 @@
                             <DataAnnotationsValidator />
                             <ValidationSummary />
                             <div class="mt-4 mb-4">
-                                <label><span class="title-text">Name:</span>
+                                <label><span class="title-text">Name (3 or more characters):</span>
                                     <InputText id="name" @bind-Value="Name" @oninput="@OnChangeName" placeholder="Type your name"
                                                maxLength="30" />
                                 </label>
                             </div>
-                            <button class="btn btn-success" type="button" @onclick="ClickSave" disabled="@IsVoteDisabled()">
-
-                                <span class="display-5">
-                                    @(IsSubmitting ? "Saving..." : "Vote")
-                                </span>
-                            </button>
                             @if (!string.IsNullOrWhiteSpace(SubmissionMessage))
                             {
                                 <div class="alert alert-info mt-3">
                                     @SubmissionMessage
                                 </div>
                             }
+                            <button class="btn btn-success" type="button" @onclick="ClickSave" disabled="@IsVoteDisabled()">
+
+                                <span class="display-5">
+                                    @(IsSubmitting ? "Saving..." : "Vote")
+                                </span>
+                            </button>
                         </div>
                     }
                     else
