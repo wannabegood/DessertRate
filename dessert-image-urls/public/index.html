@@ -47,6 +47,11 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+    button.danger {
+      margin-top: 0.75rem;
+      background: #dc262622;
+      border-color: #dc262688;
+    }
     #status {
       margin-top: 1rem;
       padding: 0.75rem;
@@ -104,6 +109,7 @@
     </div>
 
     <button id="submit-btn" type="submit" disabled>Update Image URL (PATCH)</button>
+    <button id="clear-btn" type="button" class="danger" disabled>Clear Image URLs</button>
   </form>
 
   <div id="status" role="status" aria-live="polite"></div>
@@ -111,11 +117,13 @@
   <script>
     const API_BASE = "https://dessert-scores.gtfullton.workers.dev/api";
     const PATCH_URL = `${API_BASE}/update-image-url`;
+    const CLEAR_URL = `${API_BASE}/clear-image-urls`;
 
     const contestSelect = document.getElementById("contest-select");
     const dessertSelect = document.getElementById("dessert-select");
     const imageUrlInput = document.getElementById("image-url");
     const submitBtn = document.getElementById("submit-btn");
+    const clearBtn = document.getElementById("clear-btn");
     const statusBox = document.getElementById("status");
     const hintBox = document.getElementById("current-url-hint");
     const convertedHint = document.getElementById("converted-hint");
@@ -186,6 +194,7 @@
         dessertSelect.innerHTML = `<option value="">No desserts for contest ${contestId}</option>`;
         dessertSelect.disabled = true;
         submitBtn.disabled = true;
+        clearBtn.disabled = !contestId;
         hintBox.textContent = "";
         return;
       }
@@ -202,6 +211,7 @@
 
       dessertSelect.disabled = false;
       submitBtn.disabled = false;
+      clearBtn.disabled = false;
       syncHintFromSelection();
     }
 
@@ -267,6 +277,64 @@
       syncHintFromSelection();
     });
 
+    clearBtn.addEventListener("click", async () => {
+      const contestId = contestSelect.value;
+      if (!contestId) return;
+
+      const confirmed = window.confirm(
+        `Clear all Image URLs for Contest ${contestId}?`
+      );
+      if (!confirmed) return;
+
+      submitBtn.disabled = true;
+      clearBtn.disabled = true;
+      showStatus(`Clearing Image URLs for Contest ${contestId}...`, false);
+
+      try {
+        const res = await fetch(
+          `${CLEAR_URL}?contestId=${encodeURIComponent(contestId)}`,
+          { method: "DELETE" }
+        );
+
+        const text = await res.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          parsed = text;
+        }
+
+        if (!res.ok) {
+          throw new Error(
+            typeof parsed === "string"
+              ? `HTTP ${res.status}: ${parsed}`
+              : `HTTP ${res.status}: ${parsed.error || JSON.stringify(parsed)}`
+          );
+        }
+
+        for (const row of allDesserts) {
+          if (String(row.ContestId ?? row.contestId) === String(contestId)) {
+            row.ImageUrl = "";
+            row.imageUrl = "";
+          }
+        }
+        for (const opt of dessertSelect.options) {
+          opt.dataset.imageUrl = "";
+        }
+        syncHintFromSelection();
+
+        showStatus(
+          parsed?.message || `Cleared ImageUrls for ContestId ${contestId}`,
+          false
+        );
+      } catch (err) {
+        showStatus(`Clear failed: ${err.message}`, true);
+      } finally {
+        submitBtn.disabled = dessertSelect.disabled;
+        clearBtn.disabled = false;
+      }
+    });
+
     document.getElementById("update-form").addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -280,6 +348,7 @@
       };
 
       submitBtn.disabled = true;
+      clearBtn.disabled = true;
       showStatus("Sending PATCH request...", false);
 
       try {
@@ -314,6 +383,10 @@
           match.ImageUrl = payload.ImageUrl;
           match.imageUrl = payload.ImageUrl;
         }
+        const selectedOpt = dessertSelect.selectedOptions[0];
+        if (selectedOpt) {
+          selectedOpt.dataset.imageUrl = payload.ImageUrl;
+        }
         syncHintFromSelection();
         imageUrlInput.value = "";
         convertedHint.textContent = "";
@@ -326,6 +399,7 @@
         showStatus(`Update failed: ${err.message}`, true);
       } finally {
         submitBtn.disabled = false;
+        clearBtn.disabled = false;
       }
     });
 
