@@ -19,6 +19,15 @@
       font-size: 1.35rem;
       margin-bottom: 1.25rem;
     }
+    h2 {
+      font-size: 1.1rem;
+      margin: 1.5rem 0 0.75rem;
+    }
+    hr {
+      border: 0;
+      border-top: 1px solid #8884;
+      margin: 1.75rem 0;
+    }
     .field {
       margin-bottom: 1rem;
     }
@@ -112,29 +121,45 @@
     <button id="clear-btn" type="button" class="danger" disabled>Clear Image URLs</button>
   </form>
 
+  <hr />
+
+  <section aria-labelledby="submissions-heading">
+    <h2 id="submissions-heading">Manage Submissions</h2>
+    <div class="field">
+      <label for="submission-select">Participant Name</label>
+      <select id="submission-select" disabled>
+        <option value="">Loading submissions...</option>
+      </select>
+      <div id="submission-meta-hint" class="meta"></div>
+    </div>
+    <button id="delete-submission-btn" type="button" class="danger" disabled>
+      Delete Submission
+    </button>
+  </section>
+
   <div id="status" role="status" aria-live="polite"></div>
 
   <script>
     const API_BASE = "https://dessert-scores.gtfullton.workers.dev/api";
     const PATCH_URL = `${API_BASE}/update-image-url`;
     const CLEAR_URL = `${API_BASE}/clear-image-urls`;
+    const SUBMISSIONS_URL = `${API_BASE}/submissions`;
+    const DELETE_SUBMISSION_URL = `${API_BASE}/submission`;
 
     const contestSelect = document.getElementById("contest-select");
     const dessertSelect = document.getElementById("dessert-select");
     const imageUrlInput = document.getElementById("image-url");
     const submitBtn = document.getElementById("submit-btn");
     const clearBtn = document.getElementById("clear-btn");
+    const submissionSelect = document.getElementById("submission-select");
+    const submissionMetaHint = document.getElementById("submission-meta-hint");
+    const deleteSubmissionBtn = document.getElementById("delete-submission-btn");
     const statusBox = document.getElementById("status");
     const hintBox = document.getElementById("current-url-hint");
     const convertedHint = document.getElementById("converted-hint");
 
     let allDesserts = [];
 
-    /**
-     * Converts a Dropbox share link (e.g. www.dropbox.com/...&dl=0)
-     * into a direct raw image link (dl.dropboxusercontent.com/...&raw=1).
-     * Leaves non-Dropbox or already-converted URLs unchanged.
-     */
     function toDropboxDirectUrl(inputUrl) {
       const trimmed = (inputUrl ?? "").trim();
       if (!trimmed) return "";
@@ -182,6 +207,60 @@
     function showStatus(message, isError = false) {
       statusBox.textContent = message;
       statusBox.className = isError ? "err" : "ok";
+    }
+
+    function syncSubmissionHint() {
+      const selectedOpt = submissionSelect.selectedOptions[0];
+      const submittedAt = selectedOpt?.dataset?.submittedAt || "";
+      submissionMetaHint.textContent = submittedAt
+        ? `Submitted at: ${submittedAt}`
+        : "";
+    }
+
+    async function loadSubmissionsForContest(contestId) {
+      submissionSelect.disabled = true;
+      deleteSubmissionBtn.disabled = true;
+      submissionMetaHint.textContent = "";
+
+      if (!contestId) {
+        submissionSelect.innerHTML = `<option value="">Select a contest first</option>`;
+        return;
+      }
+
+      submissionSelect.innerHTML = `<option value="">Loading submissions...</option>`;
+
+      try {
+        const res = await fetch(
+          `${SUBMISSIONS_URL}?contestId=${encodeURIComponent(contestId)}`
+        );
+        if (!res.ok) {
+          throw new Error(`GET /api/submissions failed (${res.status})`);
+        }
+        const data = await res.json();
+        const rows = Array.isArray(data) ? data : (data.results ?? []);
+
+        submissionSelect.innerHTML = "";
+        if (rows.length === 0) {
+          submissionSelect.innerHTML = `<option value="">No submissions for contest ${contestId}</option>`;
+          return;
+        }
+
+        for (const row of rows) {
+          const name = row.ParticipantName ?? row.participantName ?? "";
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          opt.dataset.submittedAt = row.SubmittedAt ?? row.submittedAt ?? "";
+          submissionSelect.appendChild(opt);
+        }
+
+        submissionSelect.disabled = false;
+        deleteSubmissionBtn.disabled = false;
+        syncSubmissionHint();
+      } catch (err) {
+        submissionSelect.innerHTML = `<option value="">Error loading submissions</option>`;
+        showStatus(`Failed to load submissions: ${err.message}`, true);
+      }
     }
 
     function populateDessertsForContest(contestId) {
@@ -243,6 +322,7 @@
         contestSelect.innerHTML = "";
         if (distinctContests.length === 0) {
           contestSelect.innerHTML = `<option value="">No contests found</option>`;
+          submissionSelect.innerHTML = `<option value="">No contests found</option>`;
           showStatus("Loaded desserts, but no ContestId values were found.", true);
           return;
         }
@@ -255,10 +335,13 @@
         }
 
         contestSelect.disabled = false;
-        populateDessertsForContest(distinctContests[0]);
+        const initialContestId = distinctContests[0];
+        populateDessertsForContest(initialContestId);
+        await loadSubmissionsForContest(initialContestId);
       } catch (err) {
         contestSelect.innerHTML = `<option value="">Error loading</option>`;
         dessertSelect.innerHTML = `<option value="">Error loading</option>`;
+        submissionSelect.innerHTML = `<option value="">Error loading</option>`;
         showStatus(`Failed to load options: ${err.message}`, true);
       }
     }
@@ -270,11 +353,68 @@
     });
 
     contestSelect.addEventListener("change", () => {
-      populateDessertsForContest(contestSelect.value);
+      const cid = contestSelect.value;
+      populateDessertsForContest(cid);
+      loadSubmissionsForContest(cid);
     });
 
     dessertSelect.addEventListener("change", () => {
       syncHintFromSelection();
+    });
+
+    submissionSelect.addEventListener("change", () => {
+      syncSubmissionHint();
+    });
+
+    deleteSubmissionBtn.addEventListener("click", async () => {
+      const contestId = contestSelect.value;
+      const participantName = submissionSelect.value;
+      if (!contestId || !participantName) return;
+
+      const confirmed = window.confirm(
+        `Delete submission for "${participantName}" in Contest ${contestId}?`
+      );
+      if (!confirmed) return;
+
+      deleteSubmissionBtn.disabled = true;
+      submissionSelect.disabled = true;
+      showStatus(`Deleting submission for ${participantName}...`, false);
+
+      try {
+        const requestUrl =
+          `${DELETE_SUBMISSION_URL}?contestId=${encodeURIComponent(contestId)}` +
+          `&participantName=${encodeURIComponent(participantName)}`;
+
+        const res = await fetch(requestUrl, { method: "DELETE" });
+
+        const text = await res.text();
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          parsed = text;
+        }
+
+        if (!res.ok) {
+          throw new Error(
+            typeof parsed === "string"
+              ? `HTTP ${res.status}: ${parsed}`
+              : `HTTP ${res.status}: ${parsed.error || JSON.stringify(parsed)}`
+          );
+        }
+
+        showStatus(
+          parsed?.message ||
+            `Deleted submission for ${participantName} in Contest ${contestId}.`,
+          false
+        );
+
+        await loadSubmissionsForContest(contestId);
+      } catch (err) {
+        showStatus(`Delete submission failed: ${err.message}`, true);
+        submissionSelect.disabled = false;
+        deleteSubmissionBtn.disabled = false;
+      }
     });
 
     clearBtn.addEventListener("click", async () => {
