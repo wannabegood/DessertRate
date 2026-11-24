@@ -69,6 +69,7 @@
       font-size: 0.8rem;
       opacity: 0.75;
       margin-top: 0.25rem;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -96,9 +97,10 @@
       <input
         id="image-url"
         type="url"
-        placeholder="https://example.com/dessert.jpg"
+        placeholder="https://www.dropbox.com/scl/fi/...?rlkey=...&dl=0"
         required
       />
+      <div id="converted-hint" class="meta"></div>
     </div>
 
     <button id="submit-btn" type="submit" disabled>Update Image URL (PATCH)</button>
@@ -116,10 +118,58 @@
     const submitBtn = document.getElementById("submit-btn");
     const statusBox = document.getElementById("status");
     const hintBox = document.getElementById("current-url-hint");
+    const convertedHint = document.getElementById("converted-hint");
 
-    // Holds all dessert rows fetched from your API so we can filter by ContestId
-    // and extract distinct ContestId values.
     let allDesserts = [];
+
+    /**
+     * Converts a Dropbox share link (e.g. www.dropbox.com/...&dl=0)
+     * into a direct raw image link (dl.dropboxusercontent.com/...&raw=1).
+     * Leaves non-Dropbox or already-converted URLs unchanged.
+     */
+    function toDropboxDirectUrl(inputUrl) {
+      const trimmed = (inputUrl ?? "").trim();
+      if (!trimmed) return "";
+
+      let parsed;
+      try {
+        parsed = new URL(trimmed);
+      } catch {
+        return trimmed;
+      }
+
+      const host = parsed.hostname.toLowerCase();
+      const isDropboxHost =
+        host === "www.dropbox.com" ||
+        host === "dropbox.com" ||
+        host === "dl.dropbox.com" ||
+        host === "dl.dropboxusercontent.com";
+
+      if (!isDropboxHost) {
+        return trimmed;
+      }
+
+      parsed.protocol = "https:";
+      parsed.hostname = "dl.dropboxusercontent.com";
+      parsed.searchParams.delete("dl");
+      parsed.searchParams.set("raw", "1");
+
+      return parsed.toString();
+    }
+
+    function syncConvertedInput() {
+      const current = imageUrlInput.value;
+      const converted = toDropboxDirectUrl(current);
+
+      if (converted && converted !== current) {
+        imageUrlInput.value = converted;
+      }
+
+      convertedHint.textContent =
+        converted && converted !== current
+          ? `Converted to direct URL: ${converted}`
+          : "";
+    }
 
     function showStatus(message, isError = false) {
       statusBox.textContent = message;
@@ -165,7 +215,6 @@
 
     async function loadInitialData() {
       try {
-        // Expects an array of dessert rows (or { results: [...] } from D1)
         const res = await fetch(`${API_BASE}/desserts`);
         if (!res.ok) {
           throw new Error(`GET /api/desserts failed (${res.status})`);
@@ -204,6 +253,12 @@
       }
     }
 
+    imageUrlInput.addEventListener("input", syncConvertedInput);
+    imageUrlInput.addEventListener("change", syncConvertedInput);
+    imageUrlInput.addEventListener("paste", () => {
+      requestAnimationFrame(syncConvertedInput);
+    });
+
     contestSelect.addEventListener("change", () => {
       populateDessertsForContest(contestSelect.value);
     });
@@ -215,10 +270,13 @@
     document.getElementById("update-form").addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      const finalUrl = toDropboxDirectUrl(imageUrlInput.value);
+      imageUrlInput.value = finalUrl;
+
       const payload = {
         ContestId: Number(contestSelect.value),
         DessertId: dessertSelect.value,
-        ImageUrl: imageUrlInput.value.trim(),
+        ImageUrl: finalUrl,
       };
 
       submitBtn.disabled = true;
@@ -247,7 +305,6 @@
           );
         }
 
-        // Update local cache so switching dropdowns reflects the new URL immediately
         const match = allDesserts.find(
           (d) =>
             String(d.ContestId ?? d.contestId) === String(payload.ContestId) &&
@@ -259,6 +316,7 @@
         }
         syncHintFromSelection();
         imageUrlInput.value = "";
+        convertedHint.textContent = "";
 
         showStatus(
           `Updated ${payload.DessertId} (Contest ${payload.ContestId})\nNew ImageUrl: ${payload.ImageUrl}`,
